@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import { MongoFilmsRepository } from 'src/repository/mongoFilms.repository';
 import { FilmDTO, GetFilmsDTO } from './dto/films.dto';
+import { FilmsRepository } from 'src/repository/films.repository';
 
 @Injectable()
 export class FilmsService {
-  constructor(private readonly filmsRepository: MongoFilmsRepository) {}
+  constructor(private readonly filmsRepository: FilmsRepository) {}
 
   async getFilms(): Promise<GetFilmsDTO> {
-    const films = await this.filmsRepository.findAll().then((films) =>
+    const films = await this.filmsRepository.findAllFilms().then((films) =>
       films.map((film) => {
         delete film.schedule;
         return film as Omit<FilmDTO, 'schedule'>;
@@ -21,7 +21,7 @@ export class FilmsService {
 
   async getFilmSchedule(id: string) {
     const schedule = await this.filmsRepository
-      .findById(id)
+      .findFilmById(id)
       .then((film) => film.schedule);
     return {
       total: schedule.length,
