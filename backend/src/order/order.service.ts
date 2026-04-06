@@ -7,17 +7,26 @@ export class OrderService {
   constructor(private readonly filmsRepository: FilmsRepository) {}
 
   async createOrder(items: CreateOrderItemDto[]) {
-    items.forEach(async (item) => {
-      const schedule = await this.filmsRepository.findScheduleById(
-        item.session,
-      );
+    const schedules = await Promise.all(
+      items.map((item) => this.filmsRepository.findScheduleById(item.session)),
+    );
+
+    items.forEach((item, index) => {
+      const schedule = schedules[index];
       const seatStr = `${item.row}:${item.seat}`;
       if (schedule.taken.includes(seatStr)) {
         throw new Error(`Seat ${seatStr} is already taken`);
       }
-      schedule.taken.push(seatStr);
-      await this.filmsRepository.updateSchedule(schedule);
     });
+
+    await Promise.all(
+      items.map((item, index) => {
+        const schedule = schedules[index];
+        const seatStr = `${item.row}:${item.seat}`;
+        schedule.taken.push(seatStr);
+        return this.filmsRepository.updateSchedule(schedule);
+      }),
+    );
 
     return {
       total: items.length,
