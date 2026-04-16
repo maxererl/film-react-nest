@@ -1,33 +1,31 @@
 import { Injectable } from '@nestjs/common';
 import { CreateOrderItemDto } from './dto/order.dto';
-import {
-  MongoFilmsRepository,
-  ScheduleDocument,
-} from 'src/repository/mongoFilms.repository';
-import { FilmDocument } from 'src/repository/mongoFilms.repository';
+import { FilmsRepository } from 'src/repository/films.repository';
 
 @Injectable()
 export class OrderService {
-  constructor(private readonly filmsRepository: MongoFilmsRepository) {}
+  constructor(private readonly filmsRepository: FilmsRepository) {}
 
   async createOrder(items: CreateOrderItemDto[]) {
-    const updateFn = (film: FilmDocument) => {
-      film.schedule.forEach((schedule: ScheduleDocument) => {
-        items.forEach((item) => {
-          if (item.session === schedule.id) {
-            const seatStr = `${item.row}:${item.seat}`;
-            if (schedule.taken.includes(seatStr)) {
-              throw new Error(`Seat ${seatStr} is already taken`);
-            }
-            schedule.taken.push(seatStr);
-          }
-        });
-      });
-    };
+    const schedules = await Promise.all(
+      items.map((item) => this.filmsRepository.findScheduleById(item.session)),
+    );
 
-    await this.filmsRepository.findByIdAndUpdate(
-      updateFn,
-      ...items.map((item) => item.film),
+    items.forEach((item, index) => {
+      const schedule = schedules[index];
+      const seatStr = `${item.row}:${item.seat}`;
+      if (schedule.taken.includes(seatStr)) {
+        throw new Error(`Seat ${seatStr} is already taken`);
+      }
+    });
+
+    await Promise.all(
+      items.map((item, index) => {
+        const schedule = schedules[index];
+        const seatStr = `${item.row}:${item.seat}`;
+        schedule.taken.push(seatStr);
+        return this.filmsRepository.updateSchedule(schedule);
+      }),
     );
 
     return {
