@@ -11,6 +11,7 @@ services:
       - http-network
     volumes:
       - frontend_dist:/var/www/app/dist
+    restart: no
 
   backend:
     build:
@@ -19,8 +20,6 @@ services:
     container_name: backend
     image: ghcr.io/maxererl/film-react-nest-backend:latest
     env_file: ./backend/.env
-    environment:
-      - DATABASE_HOST=postgres
     networks:
       - http-network
       - db-network
