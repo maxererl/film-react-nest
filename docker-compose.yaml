@@ -1,0 +1,84 @@
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: "//film-react-nest.nomorepartiessite.ru/api"
+    container_name: frontend
+    image: ghcr.io/maxererl/film-react-nest-frontend:latest
+    networks:
+      - http-network
+    volumes:
+      - frontend_dist:/app/dist
+
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: backend
+    image: ghcr.io/maxererl/film-react-nest-backend:latest
+    env_file: ./backend/.env
+    environment:
+      - DATABASE_HOST=postgres
+    depends_on:
+      - postgres
+    networks:
+      - http-network
+      - db-network
+    restart: unless-stopped
+
+  postgres:
+    image: "postgres:16"
+    container_name: postgres
+    env_file: .env.database
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    networks:
+      - db-network
+    restart: always
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    env_file: .env.pgadmin
+    ports:
+      - "8080:80"
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    networks:
+      - db-network
+    restart: always
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    ports:
+      - 80:80
+      - 443:443
+    networks:
+      - http-network
+    restart: always
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./certbot/www/:/var/www/certbot/:ro
+      - ./certbot/conf/:/etc/letsencrypt/:ro
+      - frontend_dist:/var/www/frontend:ro
+
+  certbot:
+    image: certbot/certbot:latest
+    container_name: certbot
+    networks:
+      - http-network
+    volumes:
+      - ./certbot/www/:/var/www/certbot/:rw
+      - ./certbot/conf/:/etc/letsencrypt/:rw
+
+volumes:
+  pg-data:
+  pgadmin-data:
+  frontend_dist:
+
+networks:
+  db-network:
+  http-network:

@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { FilmsRepository } from './films.repository';
-import { Films } from 'src/films/entities/film.entity';
-import { Schedules } from 'src/films/entities/schedule.entity';
+import { Films } from '../films/entities/film.entity';
+import { Schedules } from '../films/entities/schedule.entity';
 import { PostgresFilmsRepository } from './postgresFilm.repository';
 
 @Module({

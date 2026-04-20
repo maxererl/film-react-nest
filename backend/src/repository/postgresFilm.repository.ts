@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { FilmDTO, ScheduleDTO } from 'src/films/dto/films.dto';
+import { FilmDTO, ScheduleDTO } from '../films/dto/films.dto';
 import { FilmsRepository } from './films.repository';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Films } from 'src/films/entities/film.entity';
+import { Films } from '../films/entities/film.entity';
 import { Repository } from 'typeorm';
-import { Schedules } from 'src/films/entities/schedule.entity';
+import { Schedules } from '../films/entities/schedule.entity';
 
 @Injectable()
 export class PostgresFilmsRepository implements FilmsRepository {

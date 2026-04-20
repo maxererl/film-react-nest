@@ -1,0 +1,74 @@
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: "//localhost/api"
+    container_name: frontend
+    image: ghcr.io/maxererl/film-react-nest-frontend:latest
+    networks:
+      - http-network
+    volumes:
+      - frontend_dist:/var/www/app/dist
+
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: backend
+    image: ghcr.io/maxererl/film-react-nest-backend:latest
+    env_file: ./backend/.env
+    environment:
+      - DATABASE_HOST=postgres
+    depends_on:
+      - postgres
+    networks:
+      - http-network
+      - db-network
+    restart: unless-stopped
+
+  postgres:
+    image: "postgres:16"
+    container_name: postgres
+    env_file: .env.database
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    networks:
+      - db-network
+    restart: always
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    env_file: .env.pgadmin
+    ports:
+      - "8080:80"
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    networks:
+      - db-network
+    restart: always
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    ports:
+      - 80:80
+      - 443:443
+    networks:
+      - http-network
+    restart: always
+    volumes:
+      - ./nginx.local.conf:/etc/nginx/nginx.conf:ro
+      - ./certs:/etc/nginx/certs:ro
+      - frontend_dist:/var/www/frontend:ro
+
+volumes:
+  pg-data:
+  pgadmin-data:
+  frontend_dist:
+
+networks:
+  db-network:
+  http-network:

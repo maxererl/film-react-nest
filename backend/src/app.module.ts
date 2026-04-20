@@ -21,7 +21,6 @@ import { Schedules } from './films/entities/schedule.entity';
       imports: [AppConfigModule],
       inject: ['CONFIG'],
       useFactory: (config: AppConfig) => {
-        console.log(typeof config.database.password, config.database.password);
         return {
           type: 'postgres',
           host: config.database.host,
