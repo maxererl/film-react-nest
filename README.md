@@ -1,5 +1,8 @@
 # FILM!
 
+## Доступен по следующему адресу:
+https://film-react-nest.nomorepartiessite.ru/
+
 ## Установка
 
 ### MongoDB

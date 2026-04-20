@@ -13,7 +13,7 @@ services:
       - frontend_dist:/var/www/app/dist
 
   backend:
-    build: 
+    build:
       context: ./backend
       dockerfile: Dockerfile
     container_name: backend
@@ -21,34 +21,34 @@ services:
     env_file: ./backend/.env
     environment:
       - DATABASE_HOST=postgres
-    depends_on:
-      - postgres
     networks:
       - http-network
       - db-network
+    depends_on:
+      - postgres
     restart: unless-stopped
 
   postgres:
     image: "postgres:16"
     container_name: postgres
     env_file: .env.database
-    volumes:
-      - pg-data:/var/lib/postgresql/data
     networks:
       - db-network
     restart: always
+    volumes:
+      - pg-data:/var/lib/postgresql/data
 
   pgadmin:
     image: dpage/pgadmin4
     container_name: pgadmin
     env_file: .env.pgadmin
     ports:
-      - "8080:80"
-    volumes:
-      - pgadmin-data:/var/lib/pgadmin
+      - "127.0.0.1:8080:80"
     networks:
       - db-network
-    restart: always
+    restart: unless-stopped
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
 
   nginx:
     image: nginx:latest
