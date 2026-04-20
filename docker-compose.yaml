@@ -10,7 +10,7 @@ services:
     networks:
       - http-network
     volumes:
-      - frontend_dist:/app/dist
+      - frontend_dist:/var/www/app/dist
 
   backend:
     build: 
