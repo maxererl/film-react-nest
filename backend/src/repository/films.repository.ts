@@ -1,4 +1,4 @@
-import { FilmDTO, ScheduleDTO } from 'src/films/dto/films.dto';
+import { FilmDTO, ScheduleDTO } from '../films/dto/films.dto';
 
 export abstract class FilmsRepository {
   abstract findAllFilms(): Promise<FilmDTO[]>;
